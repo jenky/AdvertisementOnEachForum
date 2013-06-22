@@ -12,7 +12,8 @@ class Milano_Advertisement_ControllerAdmin_Forum extends XFCP_Milano_Advertiseme
 	{
 		$nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
 		
-		$advertisement = $this->_input->filterSingle('advertisement', XenForo_Input::STRING);
+		$advertisement = $this->getHelper('Editor')->getMessageText('message', $this->_input);
+		$advertisement = XenForo_Helper_String::autoLinkBbCode($advertisement);
 
 		if ($nodeId)
 		{

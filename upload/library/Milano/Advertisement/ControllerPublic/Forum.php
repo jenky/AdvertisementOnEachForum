@@ -3,16 +3,16 @@ class Milano_Advertisement_ControllerPublic_Forum extends XFCP_Milano_Advertisem
 {
 	public function actionEditAdvertisement()
 	{
-		$forumId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
-		$forum = $this->_getForumModel()->getForumById($forumId);
-		$ftpHelper = $this->getHelper('ForumThreadPost');
+		$this->_assertRegistrationRequired();
 		
-		$advertisement = $this->_input->filterSingle('advertisement', XenForo_Input::STRING);
-		/*
-		* To do: maybe support Tiny MCE
+		$forumId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
+		$forumName = $this->_input->filterSingle('node_name', XenForo_Input::STRING);
+
+		$ftpHelper = $this->getHelper('ForumThreadPost');
+		$forum = $ftpHelper->assertForumValidAndViewable($forumId ? $forumId : $forumName);
+
 		$advertisement = $this->getHelper('Editor')->getMessageText('message', $this->_input);
 		$advertisement = XenForo_Helper_String::autoLinkBbCode($advertisement);
-		*/
 		
 		if (!$forumId)
 		{
@@ -26,7 +26,7 @@ class Milano_Advertisement_ControllerPublic_Forum extends XFCP_Milano_Advertisem
 				return $this->responseError(new XenForo_Phrase('please_complete_required_fields'));
 			}
 			
-			$dw = XenForo_DataWriter::create('XenForo_DataWriter_Node');
+			$dw = XenForo_DataWriter::create('XenForo_DataWriter_Forum');
 			$dw->setExistingData($forumId);
 			$dw->set('advertisement', $advertisement);
 			$dw->save();
@@ -43,7 +43,7 @@ class Milano_Advertisement_ControllerPublic_Forum extends XFCP_Milano_Advertisem
 				'nodeBreadCrumbs' => $ftpHelper->getNodeBreadCrumbs($forum),
 			);
 					
-			return $this->responseView('Milano_Advertisement_ViewPublic_Edit', 'advertisement_edit', $viewParams); 
+			return $this->responseView('Milano_Advertisement_ViewPublic_Forum_Edit', 'advertisement_edit', $viewParams); 
 		}
 	}
 	

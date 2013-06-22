@@ -2,62 +2,49 @@
 
 class Milano_Advertisement_Install
 {
-	public static function addColumn($table, $field, $attr)
+	public static function dbColumn($table, $field, $action = 'drop', $attr = NULL, $after = NULL)
 	{
-		if (!self::checkIfFieldExist($table, $field)) 
+		$exists = self::checkIfFieldExist($table, $field);
+		$db = XenForo_Application::get('db');
+
+		$action = strtolower($action);
+
+		if ($action == 'drop') 
 		{
-			$db = XenForo_Application::get('db');
-			return $db->query("ALTER TABLE `" . $table . "` ADD `" . $field . "` " . $attr);
+			if ($exists)
+			{
+				return $db->query("ALTER TABLE `" . $table . "` DROP `" . $field);  
+			}
+		}
+		elseif ($action == 'add')
+		{
+			if (!$exists)
+			{
+				$afterColumn = !empty($after) ? " AFTER " . $after : '';
+				return $db->query("ALTER TABLE `" . $table . "` ADD `" . $field . "` " . $attr . $afterColumn);
+			}            
 		}
 	}
 
 	public static function checkIfFieldExist($table, $field)
 	{
 		$db = XenForo_Application::get('db');
-		if ($db->fetchRow('SHOW COLUMNS FROM `' . $table . '` WHERE Field = ?', $field)) 
-		{
-			return true;
-		}
-		else 
-		{
-			return false;
-		}
+		return $db->fetchRow('SHOW COLUMNS FROM `' . $table . '` WHERE Field = ?', $field);
 	}
 	
 	public static function checkIfTableExist($table)
 	{
 		$db = XenForo_Application::get('db');
-		if ($db->fetchRow('SHOW TABLES LIKE \'' . $table . '\'')) 
-		{
-			return true;
-		}
-		else 
-		{
-			return false;
-		}
+		return $db->fetchRow('SHOW TABLES LIKE \'' . $table . '\''); 
 	}
 	
 	public static function install()
 	{
-		$db = XenForo_Application::get('db');
-		
-		if (!self::checkIfFieldExist('xf_node', 'advertisement')) 
-		{
-			$db->query('
-				ALTER TABLE  `xf_node` DROP  `advertisement`
-			');
-		}
-		if (!self::checkIfFieldExist('xf_forum', 'advertisement')) 
-		{
-			self::addColumn('xf_forum', 'advertisement', "  MEDIUMTEXT  ");
-		}
+		self::dbColumn('xf_forum', 'advertisement', 'add', "  MEDIUMTEXT  ");
 	}
 	
 	public static function uninstall()
 	{
-		$db = XenForo_Application::get('db');
-		$db->query("
-			ALTER TABLE  `xf_forum` DROP  `advertisement`
-		");
+		self::dbColumn('xf_forum', 'advertisement');
 	}	
 }

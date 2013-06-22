@@ -1,23 +1,6 @@
 <?php
 class Milano_Advertisement_Listener
 {
-	public static function loadClassListener($class, &$extend)
-	{
-		$classes = array(
-			'DataWriter_Forum',
-			'ControllerAdmin_Forum',
-			'ControllerPublic_Forum',
-		);
-
-		foreach($classes AS $_class)
-		{
-			if ($class == 'XenForo_' .$_class)
-			{
-				$extend[] = 'Milano_Advertisement_' .$_class;
-			}
-		}
-	}
-	
 	public static function templateCreate($templateName, array &$params, XenForo_Template_Abstract $template) 
 	{
 		$template->preloadTemplate('advertisement');
@@ -25,10 +8,7 @@ class Milano_Advertisement_Listener
 	}
 	
 	public static function templateHook($hookName, &$contents, array $hookParams, XenForo_Template_Abstract $template) 
-    {
-    	$user = XenForo_Visitor::getInstance();
-		$canEditAdvertisement = XenForo_Permission::hasPermission($user['permissions'], 'forum', 'editAdvertisement');
-    	
+    { 	
 		switch ($hookName)
         {
             case 'forum_edit_basic_information':
@@ -37,12 +17,30 @@ class Milano_Advertisement_Listener
                 break;
                 
             case 'ad_forum_view_above_thread_list':
-            	$params = $template->getParams();
-                $params['canEditAdvertisement'] = $canEditAdvertisement;
-                $params += $hookParams;
-                $ourTemplate = $template->create('advertisement', $params);
+                $ourTemplate = $template->create('advertisement', $template->getParams());
                 $contents .= $ourTemplate->render();
                 break;
         }
+	}
+
+	public static function loadClassListener($class, &$extend)
+	{
+		$classes = array(
+			'DataWriter_Forum',
+
+			'ControllerAdmin_Forum',
+			'ControllerPublic_Forum',
+
+			'ViewAdmin_Forum_Edit',
+			'ViewPublic_Forum_View'
+		);
+
+		foreach($classes AS $_class)
+		{
+			if ($class == 'XenForo_' . $_class)
+			{
+				$extend[] = 'Milano_Advertisement_' . $_class;
+			}
+		}
 	}
 }
