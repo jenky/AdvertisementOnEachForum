@@ -1,8 +1,7 @@
 #Advertisement On Each Forum
 
- * Version: 1.5
- * Platform: XenForo
- * Copyright (c) 2012 Milano
+ * Version: 2.0.1
+ * Copyright (c) 2013 Milano
 
 ##INSTALLATION
 
